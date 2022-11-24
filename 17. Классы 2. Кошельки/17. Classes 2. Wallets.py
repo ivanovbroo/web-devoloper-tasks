@@ -23,6 +23,9 @@ class BaseWallet:
         convert = self.amount * self.exchange_rate
         return convert
 
+    def __str__(self):
+        return 
+
 class RubbleWallet(BaseWallet):
     exchange_rate = 1
 
