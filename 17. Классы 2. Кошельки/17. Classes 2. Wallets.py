@@ -5,35 +5,121 @@ class BaseWallet:
         self.amount = amount 
 
     def __add__(self, other):
+        tmp = self._copy()
         if isinstance(other, BaseWallet):
-            other = other.to_base()
-        result = self.amount + other
-        return BaseWallet(self.name, result)
+            other = other.to_base() / self.exchange_rate
+        tmp.amount = self.amount + other
+        return tmp
 
     def __iadd__(self, other):
         if isinstance(other, BaseWallet):
-            other = other.to_base()
+            other = other.to_base() / self.exchange_rate
         self.amount = self.amount + other
         return self
 
     def __radd__(self, other):
         return self + other
 
+    def __sub__(self, other):
+        tmp = self._copy()
+        if isinstance(other, BaseWallet):
+            other = other.to_base() / self.exchange_rate
+        tmp.amount = self.amount - other
+        return tmp
+
+    def __isub__(self, other):
+        if isinstance(other, BaseWallet):
+            other = other.to_base() / self.exchange_rate
+        self.amount -= other
+        return self
+    
+    def __rsub__(self, other):
+        return (self - other) * (-1)
+
+    def __mul__(self, other):
+        tmp = self._copy()
+        if isinstance(other, BaseWallet):
+            other = other.to_base() / self.exchange_rate
+        tmp.amount = self.amount * other
+        return tmp
+    
+    def __imul__(self, other):
+        if isinstance(other, BaseWallet):
+            other = other.to_base() / self.exchange_rate
+        self.amount = self.amount * other
+        return self
+
+    def __rmul__(self, other):
+        return self * other
+
+
+    def __truediv__(self, other):
+        tmp = self._copy()
+        if isinstance(other, BaseWallet):
+            other = other.to_base() / self.exchange_rate
+        tmp.amount = self.amount / other
+        return tmp
+
+    def __itruediv__(self, other):
+        if isinstance(other, BaseWallet):
+            other = other.to_base() / self.exchange_rate
+        self.amount = self.amount / other
+        return self
+
     def to_base(self):
         convert = self.amount * self.exchange_rate
         return convert
 
     def __str__(self):
-        return 
+        return "{} {}".format(self.name, self.amount) 
 
+    def __eq__(self, other):
+        if isinstance(other, BaseWallet):
+            if(type(self).__name__ == type(other).__name__) and (self.amount == other.amount):
+                return True
+        return False
+
+    def spend_all(self):
+        if(self.amount > 0):
+            self.amount = 0
+            return self
+
+            
 class RubbleWallet(BaseWallet):
     exchange_rate = 1
+
+    def __init__(self, name, amount):
+        super().__init__(name, amount)
+
+    def _copy(self):
+        return RubbleWallet(self.name, self.amount)
+
+    def __str__(self):
+        return "Rubble Wallet " + super().__str__()
 
 class DollarWallet(BaseWallet):
     exchange_rate = 60
 
+    def __init__(self, name, amount):
+        super().__init__(name, amount)
+
+    def _copy(self):
+        return DollarWallet(self.name, self.amount)
+
+    def __str__(self):
+        return "Dollar Wallet " + super().__str__()
+
 class EuroWallet(BaseWallet):
     exchange_rate = 70
+
+    def __init__(self, name, amount):
+        super().__init__(name, amount)
+
+    def _copy(self):
+        return EuroWallet(self.name, self.amount)
+
+    def __str__(self):
+        return "Euro Wallet " + super().__str__()
 
 # тест __add__
 print("тест __add__")
@@ -56,6 +142,12 @@ print(euro1.name, euro1.amount)
 euro2 = euro1 + 20
 print(euro2.name, euro2.amount)
 
+# проверка создания класса за счет _copy
+print("\n_copy")
+print(rub2)
+print(dol2)
+print(euro2)
+
 # тест __iadd__
 print("\nтест __iadd__")
 
@@ -76,6 +168,12 @@ print(euro3.name, euro3.amount)
 
 euro3 += 20
 print(euro3.name, euro3.amount)
+
+# проверка создания класса за счет _copy
+print("\n_copy")
+print(rub3)
+print(dol3)
+print(euro3)
 
 # тест __radd__
 print("\nтест __radd__")
@@ -101,8 +199,14 @@ euro5 = 50 + euro4
 print(euro4.name, euro4.amount)
 print(euro5.name, euro5.amount)
 
-# тест сложение классов
-print("\nтест сложение классов")
+# проверка создания класса за счет _copy
+print("\n_copy")
+print(rub5)
+print(dol5)
+print(euro5)
+
+# тест сложение классов __add__
+print("\nтест сложение классов __add__")
 
 rub6 = RubbleWallet("Руб6", 60)
 rub7 = RubbleWallet("Руб7", 70)
@@ -116,72 +220,151 @@ dol6 = DollarWallet("Дол6", 1)
 rub9 = rub6 + dol6
 print(rub9.name, rub9.amount)
 
+dol7 = dol6 + rub6
+print(dol7)
+
 euro6 = EuroWallet("Евро6", 1)
 rub10 = rub7 + euro6
 print(rub10.name, rub10.amount)
 
-# rub1 += 20
-# print(rub1.name, rub1.amount)
+euro7 = euro6 + rub7
+print(euro7)
 
-# 20 + rub1
-# print(rub1.name, rub1.amount)
+euro8 = euro6 + euro7
+print(euro8)
 
-# dol1 = DollarWallet("Дол", 10)
+dol8 = dol6 + dol7
+print(dol8)
 
-# rub1 + dol1
-# print(rub1.name, rub1.amount)
+# тест сложение классов __iadd__
+print("\nтест сложение классов __iadd__")
 
-# dol2 = DollarWallet("Дол", 2)
-# rub2 = RubbleWallet("Руб", 60)
+rub11 = RubbleWallet("Руб11", 10)
+rub11 += rub6
+print(rub11)
 
-# dol2 + rub2
-# print(dol2.name, dol2.amount)
-# print(rub2.name, rub2.amount)
+rub11 += dol6
+print(rub11)
 
-# rub2 += dol2
-# print(rub2.name, rub2.amount)
-# print(dol2.name, dol2.amount)
+rub11 += euro6
+print(rub11)
 
-# dol2 += rub2
-# print(dol2.name, dol2.amount)
+# тест вычитание классов __sub__
+print("\nтест вычитание классов __sub__")
 
-# euro3 = EuroWallet("Евро", 1)
-# rub3  = RubbleWallet("Руб", 10)
-# dol3  = DollarWallet("Дол", 7)
+rub12 = RubbleWallet("Руб12", 12)
+rub13 = rub12 - 2
+print(rub13)
 
-# rub3 + euro3
-# print(rub3.name, rub3.amount)
+euro12 = EuroWallet("Евро12", 12)
+euro13 = euro12 - 2
+print(euro13)
 
-# rub3 += euro3
-# print(rub3.name, rub3.amount)
+dol12 = DollarWallet("Дол12", 12)
+dol13 = dol12 - 2
+print(dol13)
 
-# euro1 = EuroWallet("Евро", 1)
-# euro1 + 1
-# print(euro1.name, euro1.amount)
+rub14 = rub6 - dol6
+print(rub14)
 
-# 1 + euro1
-# print(euro1.name, euro1.amount)
+dol14 = dol6 - rub6
+print(dol14)
 
-# euro1 += 1
-# print(euro1.name, euro1.amount)
+euro14 = euro6 - rub7
+print(euro14)
 
-# rub4  = RubbleWallet("Руб", 70)
-# euro2 = EuroWallet("Евро", 1)
+euro15 = euro6 - dol6
+print(euro15)
 
-# euro2 + rub4
-# print(euro2.name, euro2.amount)
+# тест вычитание классов __isub__
+print("\nтест вычитание классов __isub__")
 
-# euro2 += rub4
-# print(euro2.name, euro2.amount)
+rub12 = RubbleWallet("Руб12", 12)
+rub12 -= 2
+print(rub13)
 
-# dol3 + euro3
-# print(dol3.name, dol3.amount)
+euro12 = EuroWallet("Евро12", 12)
+euro12 -= 2
+print(euro13)
 
-# print(sum1.name, sum1.amount)
-# print(sum2.name, sum2.amount)
+dol12 = DollarWallet("Дол12", 12)
+dol12 -= 2
+print(dol13)
+
+rub6 -= dol6
+print(rub6)
+
+rub6+=60
+dol6 -= rub6
+print(dol6)
+
+euro6 -= rub7
+print(euro6)
+
+# тест вычитание классов __rsub__
+print("\nтест вычитание классов __rsub__")
+
+rub15 = RubbleWallet("Руб15", 60)
+rub16 = 70 - rub15
+print(rub16)
+
+dol15 = DollarWallet("dol15", 5)
+dol16 = 2 - dol15
+print(dol16)
+
+# тест умножение классов __mul__
+print("\nтест умножение классов __mul__")
+
+rub17 = rub15 * 5
+print(rub17)
+
+rub17 *= 3
+print(rub17)
+
+rub18 = rub15 * dol15
+print(rub18)
+
+dol17 = 5 * dol15
+print(dol17)
+
+# тест деление классов __truediv__
+print("\nтест деление классов __truediv__")
+
+rub19 = rub15 / 5
+print(rub19)
+
+dol18 = dol15 / rub15
+print(dol18)
+
+# тест деление классов __itruediv__
+print("\nтест вычитание классов __itruediv__")
+
+dol18 /= 5
+print(dol18)
+
+rub15 /= dol18
+print(rub15)
+
+# тест сравнение классов __eq__
+print("\nтест сравнение классов __eq__")
+rub20 = RubbleWallet("Руб20", 10)
+rub21 = RubbleWallet("Руб21", 10)
+
+print(rub20 == rub21)
+print(rub20 == rub15)
+print(rub20 == dol15)
+print(rub20 == 20)
+
+# тест spend_all()
+print("\nтест spend_all()")
+
+rub20.spend_all()
+print(rub20)
+
+rub22 = RubbleWallet("Руб22", -10)
+print(rub22)
+rub22.spend_all()
+print(rub22)
 
 
-# print(rub1.amount)
 
-
-    
