@@ -3,6 +3,11 @@ import re
 class Field(dict):
 
     _key_set = set()
+
+    def __init__(self, start = 0.0, stop = 0.0, step = 1):
+        self.start = start
+        self.stop  = stop
+        self.step  = step
     
     def _convert(self, raw_key):
         key = str()
@@ -16,7 +21,7 @@ class Field(dict):
                 except ValueError:
                     key += i
             else:
-                return ValueError
+                raise ValueError
 
             if(tmp != 0 and key != ""):
                 key += str(tmp)
@@ -26,7 +31,7 @@ class Field(dict):
         if pattern.match(key.upper()):
             return key.upper()    
         else:
-            return ValueError
+            raise ValueError
     
 
     def _check_type(self, raw_key):
@@ -38,17 +43,20 @@ class Field(dict):
             key = self._convert(raw_key)
             return key
         elif(type(raw_key) == tuple and len(raw_key) > 2):
-            return TypeError
+            raise TypeError
         elif(type(raw_key) == str and len(raw_key) < 2):
-            return TypeError
+            raise TypeError
         else:
-            return TypeError
+            raise TypeError
     
     def __getitem__(self, raw_key):
 
         key = self._check_type(raw_key)
 
-        return super(Field, self).__getitem__(key)
+        if key in self._key_set:
+            return super(Field, self).__getitem__(key)
+        else:
+            return None
 
     def __setitem__(self, raw_key, value):
 
@@ -58,7 +66,7 @@ class Field(dict):
         return super(Field, self).__setitem__(key, value)
 
     def __missing__(self, key):
-        return NameError
+        return None
 
     def __delitem__(self, raw_key):
         key = self._check_type(raw_key)
@@ -72,8 +80,7 @@ class Field(dict):
         return False   
 
     def __iter__(self):
-        getattr()     
-
+        return iter(self.values())
         
 
 
@@ -135,5 +142,7 @@ print(field["Z1"])
 # print("B1" in field)
 # print(('D', '4') in field)
 
-for i in field:
-    pass
+# for i in field:
+#     print(i)
+
+# print(field["C1"] is None)
