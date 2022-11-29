@@ -3,11 +3,6 @@ import re
 class Field(dict):
 
     _key_set = set()
-
-    def __init__(self, start = 0.0, stop = 0.0, step = 1):
-        self.start = start
-        self.stop  = stop
-        self.step  = step
     
     def _convert(self, raw_key):
         key = str()
@@ -70,6 +65,7 @@ class Field(dict):
 
     def __delitem__(self, raw_key):
         key = self._check_type(raw_key)
+        Field._key_set.remove(key)
         super(Field, self).__delitem__(key)
 
     def __contains__(self, raw_key):
@@ -81,21 +77,55 @@ class Field(dict):
 
     def __iter__(self):
         return iter(self.values())
+
+    def __getattr__(self, raw_key):
+        try:
+            return self[raw_key]
+        except ValueError:
+            return super(Field, self).__getattr__(raw_key)
+
+    def __setattr__(self, raw_key, value): 
+        try:
+            self[raw_key] = value
+        except ValueError:
+            return super(Field, self).__setattr__(raw_key, value)
+
+    def __delattr__(self, raw_key):
+
+        try:
+            self.__delitem__(raw_key)
+        except ValueError:
+            return super(Field, self).__delattr__(raw_key)
+
+        
+
+        
+
+        
+
+        
         
 
 
 
 field = Field()  
 
+field.g25 = 25
+print(field["g25"])
 
-li = ["A23942"]
-pattern = re.compile(r'[A-Z][0-9]+$')
 
-for i in li:
-    if pattern.match(i):
-        print(i)
-    else:
-        print("Error", i)
+print(field.__dict__)
+print(field.g25)
+del field.G25
+print(field.g25)
+
+field_test = Field()
+field_test.abcde = 125
+print(field_test.abcde, field_test.__dict__['abcde'] == 125)
+
+del field_test.abcde
+print(field_test.abcde, field_test.__dict__['abcde'] == 125)
+
 
 # правильные ключи
 field[1, 'a']   = 1
