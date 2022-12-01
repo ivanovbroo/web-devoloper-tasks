@@ -19,7 +19,7 @@ class Booking:
         self.start_time = datetime.datetime.strftime(start, "%H:%M")
         
         self.end_date   = datetime.datetime.strftime(end, "%Y-%m-%d")
-        self.end_time   = None
+        self.end_time   = datetime.datetime.strftime(end, "%H:%M")
          
     
     start = property()
@@ -43,13 +43,13 @@ class Booking:
         self.end_time = datetime.datetime.strftime(end_date, "%H:%M")
         self.duration = int((end_date - self.__start).total_seconds()//60)
 
-    # def create_booking(room_name, start, end):
-    #     Booking = Booking(........)
-    #     try:
-    #         result = register_booking(booking)
-    #     except ....:
-    #         ....
-    #     return json.dumps(......)
+    def create_booking(room_name, start, end):
+        Booking = Booking(........)
+        try:
+            result = register_booking(booking)
+        except ....:
+            ....
+        return json.dumps(......)
 
 
 
